@@ -112,8 +112,8 @@ crowdfunding-dapp/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOURUSERNAME/crowdfund-dapp.git
-cd crowdfund-dapp
+git clone https://github.com/yongying37/crowdfunding-dapp.git
+cd crowdfunding-dapp
 ```
 
 ### 2. Install Dependencies
