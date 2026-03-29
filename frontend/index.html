@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crowdfunding DApp Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dbe1ea;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input, textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button.secondary {
+      background: #475569;
+    }
+    button:hover {
+      opacity: 0.92;
+    }
+    .mono {
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      word-break: break-all;
+    }
+    .status {
+      padding: 10px;
+      border-radius: 8px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+    .small {
+      font-size: 13px;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>Crowdfunding DApp</h1>
+      <div class="small">Simple UI for our BSC Testnet deployed contract</div>
+    </div>
+    <div>
+      <button id="connectBtn">Connect Wallet</button>
+      <div id="walletInfo" class="small">Not connected</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Setup</h2>
+    <label for="contractAddress">Contract Address</label>
+    <input id="contractAddress" placeholder="Please paste deployed contract address here" />
+    <div class="small">Deploy the contract on BNB Smart Chain Testnet, then paste the address here</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Create Campaign</h2>
+      <label for="title">Title</label>
+      <input id="title" placeholder="e.g. Green Campus Solar Fund" />
+
+      <label for="goal">Goal (tBNB)</label>
+      <input id="goal" placeholder="e.g. 0.003" />
+
+      <label for="duration">Duration (seconds)</label>
+      <input id="duration" placeholder="e.g. 3600" />
+
+      <label for="milestones">Milestones (comma separated tBNB)</label>
+      <input id="milestones" placeholder="e.g. 0.0015,0.0015" />
+
+      <button id="createCampaignBtn">Create Campaign</button>
+    </div>
+
+    <div class="card">
+      <h2>Contribute</h2>
+      <label for="contributeCampaignId">Campaign ID</label>
+      <input id="contributeCampaignId" placeholder="Campaign ID" />
+
+      <label for="contributeAmount">Amount (tBNB)</label>
+      <input id="contributeAmount" placeholder="Amount (tBNB)" />
+
+      <button id="contributeBtn">Contribute</button>
+    </div>
+
+    <div class="card">
+      <h2>Vote on Milestone</h2>
+      <label for="voteCampaignId">Campaign ID</label>
+      <input id="voteCampaignId" placeholder="Campaign ID" />
+
+      <label for="voteMilestoneIndex">Milestone Index</label>
+      <input id="voteMilestoneIndex" placeholder="Milestone Index" />
+
+      <label for="voteApprove">Approve?</label>
+      <select id="voteApprove">
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+
+      <button id="voteBtn">Vote</button>
+    </div>
+
+    <div class="card">
+      <h2>Release Milestone Funds</h2>
+      <label for="releaseCampaignId">Campaign ID</label>
+      <input id="releaseCampaignId" placeholder="e.g. 0" />
+
+      <label for="releaseMilestoneIndex">Milestone Index</label>
+      <input id="releaseMilestoneIndex" placeholder="e.g. 0" />
+
+      <button id="releaseBtn">Release Funds</button>
+    </div>
+
+    <div class="card">
+      <h2>Refund</h2>
+      <label for="refundCampaignId">Campaign ID</label>
+      <input id="refundCampaignId" placeholder="e.g. 1" />
+
+      <button id="refundBtn">Claim Refund</button>
+    </div>
+
+    <div class="card">
+      <h2>Read Campaign</h2>
+      <label for="readCampaignId">Campaign ID</label>
+      <input id="readCampaignId" placeholder="e.g. 0" />
+
+      <button id="readDetailsBtn" class="secondary">Get Details</button>
+      <button id="readStatusBtn" class="secondary">Get Status</button>
+      <button id="readMilestoneBtn" class="secondary">Get Milestone 0</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Output</h2>
+    <div id="output" class="status">Ready.</div>
+  </div>
+
+  <script>
+    const ABI = [
+      "function createCampaign(string _title, uint256 _goal, uint256 _durationSeconds, uint256[] _milestoneAmounts) external returns (uint256)",
+      "function contribute(uint256 _campaignId) external payable",
+      "function voteOnMilestone(uint256 _campaignId, uint256 _milestoneIndex, bool _approve) external",
+      "function releaseMilestoneFunds(uint256 _campaignId, uint256 _milestoneIndex) external",
+      "function claimRefund(uint256 _campaignId) external",
+      "function getCampaignDetails(uint256 _campaignId) external view returns (address creator, string title, uint256 goal, uint256 deadline, uint256 totalRaised, uint256 releasedAmount, uint256 backerCount, uint256 milestoneCount)",
+      "function getCampaignStatus(uint256 _campaignId) external view returns (string)",
+      "function getMilestoneDetails(uint256 _campaignId, uint256 _milestoneIndex) external view returns (uint256 amount, uint256 approvalCount, bool released)",
+      "function getContribution(uint256 _campaignId, address _backer) external view returns (uint256)",
+      "function campaignCount() external view returns (uint256)"
+    ];
+
+    let provider;
+    let signer;
+    let currentAccount;
+
+    const output = document.getElementById('output');
+    const walletInfo = document.getElementById('walletInfo');
+
+    function setOutput(message) {
+      output.textContent = message;
+    }
+
+    function getContractAddress() {
+      const address = document.getElementById('contractAddress').value.trim();
+      if (!address) {
+        throw new Error('Please paste your deployed contract address first.');
+      }
+      return address;
+    }
+
+    function getContract(withSigner = true) {
+      const address = getContractAddress();
+      return new ethers.Contract(address, ABI, withSigner ? signer : provider);
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        throw new Error('MetaMask not detected.');
+      }
+
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+      signer = await provider.getSigner();
+      currentAccount = await signer.getAddress();
+      const network = await provider.getNetwork();
+      const balance = await provider.getBalance(currentAccount);
+
+      document.getElementById('connectBtn').textContent = "Connected";
+
+      walletInfo.innerHTML = `
+        Connected: <span class="mono">${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}</span><br>
+        Chain ID: ${network.chainId}<br>
+        Balance: ${ethers.formatEther(balance)} native token
+      `;
+
+      setOutput('Wallet connected successfully.');
+    }
+
+    async function createCampaign() {
+      const contract = getContract(true);
+
+      const title = document.getElementById('title').value.trim();
+      const goalInput = document.getElementById('goal').value.trim();
+      const duration = document.getElementById('duration').value.trim();
+      const milestonesInput = document.getElementById('milestones').value.trim();
+
+      if (!title || !goalInput || !duration || !milestonesInput) {
+        throw new Error('Please fill in title, goal, duration, and milestones.');
+      }
+
+      const goal = ethers.parseEther(goalInput);
+      const milestoneStrings = milestonesInput.split(',').map(v => v.trim()).filter(Boolean);
+      const milestoneAmounts = milestoneStrings.map(v => ethers.parseEther(v));
+
+      setOutput('Sending create campaign transaction...');
+      const tx = await contract.createCampaign(title, goal, duration, milestoneAmounts);
+      setOutput(`Transaction sent: ${tx.hash}\nWaiting for confirmation...`);
+
+      const receipt = await tx.wait();
+      const txLink = `https://testnet.bscscan.com/tx/${receipt.hash}`;
+      setOutput(`Campaign created successfully.\nTx hash: ${receipt.hash}\nBscScan: ${txLink}`);
+    }
+
+    async function contribute() {
+      const contract = getContract(true);
+      const campaignId = document.getElementById('contributeCampaignId').value.trim();
+      const amount = document.getElementById('contributeAmount').value.trim();
+
+      if (!campaignId || !amount) {
+        throw new Error('Please enter campaign ID and contribution amount.');
+      }
+
+      setOutput('Sending contribution transaction...');
+      const tx = await contract.contribute(campaignId, { value: ethers.parseEther(amount) });
+      setOutput(`Transaction sent: ${tx.hash}\nWaiting for confirmation...`);
+
+      const receipt = await tx.wait();
+      const txLink = `https://testnet.bscscan.com/tx/${receipt.hash}`;
+      setOutput(`Contribution successful.\nTx hash: ${receipt.hash}\nBscScan: ${txLink}`);
+    }
+
+    async function vote() {
+      const contract = getContract(true);
+      const campaignId = document.getElementById('voteCampaignId').value.trim();
+      const milestoneIndex = document.getElementById('voteMilestoneIndex').value.trim();
+      const approve = document.getElementById('voteApprove').value === 'true';
+
+      if (!campaignId || !milestoneIndex) {
+        throw new Error('Please enter campaign ID and milestone index.');
+      }
+
+      setOutput('Sending vote transaction...');
+      const tx = await contract.voteOnMilestone(campaignId, milestoneIndex, approve);
+      setOutput(`Transaction sent: ${tx.hash}\nWaiting for confirmation...`);
+
+      const receipt = await tx.wait();
+      const txLink = `https://testnet.bscscan.com/tx/${receipt.hash}`;
+      setOutput(`Vote recorded successfully.\nTx hash: ${receipt.hash}\nBscScan: ${txLink}`);
+    }
+
+    async function releaseFunds() {
+      const contract = getContract(true);
+      const campaignId = document.getElementById('releaseCampaignId').value.trim();
+      const milestoneIndex = document.getElementById('releaseMilestoneIndex').value.trim();
+
+      if (!campaignId || !milestoneIndex) {
+        throw new Error('Please enter campaign ID and milestone index.');
+      }
+
+      setOutput('Sending release transaction...');
+      const tx = await contract.releaseMilestoneFunds(campaignId, milestoneIndex);
+      setOutput(`Transaction sent: ${tx.hash}\nWaiting for confirmation...`);
+
+      const receipt = await tx.wait();
+      const txLink = `https://testnet.bscscan.com/tx/${receipt.hash}`;
+      setOutput(`Milestone funds released successfully.\nTx hash: ${receipt.hash}\nBscScan: ${txLink}`);
+    }
+
+    async function refund() {
+      const contract = getContract(true);
+      const campaignId = document.getElementById('refundCampaignId').value.trim();
+
+      if (!campaignId) {
+        throw new Error('Please enter campaign ID.');
+      }
+
+      setOutput('Sending refund transaction...');
+      const tx = await contract.claimRefund(campaignId);
+      setOutput(`Transaction sent: ${tx.hash}\nWaiting for confirmation...`);
+
+      const receipt = await tx.wait();
+      const txLink = `https://testnet.bscscan.com/tx/${receipt.hash}`;
+      setOutput(`Refund claimed successfully.\nTx hash: ${receipt.hash}\nBscScan: ${txLink}`);
+    }
+
+    async function readDetails() {
+      const contract = getContract(false);
+      const campaignId = document.getElementById('readCampaignId').value.trim();
+
+      if (!campaignId) {
+        throw new Error('Please enter campaign ID.');
+      }
+
+      const result = await contract.getCampaignDetails(campaignId);
+
+      setOutput(
+        `Campaign ${campaignId} details:\n` +
+        `creator: ${result[0]}\n` +
+        `title: ${result[1]}\n` +
+        `goal: ${ethers.formatEther(result[2])}\n` +
+        `deadline: ${result[3].toString()}\n` +
+        `totalRaised: ${ethers.formatEther(result[4])}\n` +
+        `releasedAmount: ${ethers.formatEther(result[5])}\n` +
+        `backerCount: ${result[6].toString()}\n` +
+        `milestoneCount: ${result[7].toString()}`
+      );
+    }
+
+    async function readStatus() {
+      const contract = getContract(false);
+      const campaignId = document.getElementById('readCampaignId').value.trim();
+
+      if (!campaignId) {
+        throw new Error('Please enter campaign ID.');
+      }
+
+      const status = await contract.getCampaignStatus(campaignId);
+      setOutput(`Campaign ${campaignId} status: ${status}`);
+    }
+
+    async function readMilestone() {
+      const contract = getContract(false);
+      const campaignId = document.getElementById('readCampaignId').value.trim();
+
+      if (!campaignId) {
+        throw new Error('Please enter campaign ID.');
+      }
+
+      const result = await contract.getMilestoneDetails(campaignId, 0);
+      setOutput(
+        `Campaign ${campaignId}, Milestone 0:\n` +
+        `amount: ${ethers.formatEther(result[0])}\n` +
+        `approvalCount: ${result[1].toString()}\n` +
+        `released: ${result[2]}`
+      );
+    }
+
+    async function bindHandler(id, fn) {
+      document.getElementById(id).addEventListener('click', async () => {
+        try {
+          await fn();
+        } catch (error) {
+          console.error(error);
+          setOutput(error?.reason || error?.shortMessage || error?.message || 'Transaction failed.');
+        }
+      });
+    }
+
+    bindHandler('connectBtn', connectWallet);
+    bindHandler('createCampaignBtn', createCampaign);
+    bindHandler('contributeBtn', contribute);
+    bindHandler('voteBtn', vote);
+    bindHandler('releaseBtn', releaseFunds);
+    bindHandler('refundBtn', refund);
+    bindHandler('readDetailsBtn', readDetails);
+    bindHandler('readStatusBtn', readStatus);
+    bindHandler('readMilestoneBtn', readMilestone);
+
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', async (accounts) => {
+        if (accounts.length === 0) return;
+
+        currentAccount = accounts[0];
+        signer = await provider.getSigner();
+
+        const balance = await provider.getBalance(currentAccount);
+        const network = await provider.getNetwork();
+
+        walletInfo.innerHTML = `
+          Connected: <span class="mono">${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}</span><br>
+          Chain ID: ${network.chainId}<br>
+          Balance: ${ethers.formatEther(balance)} native token
+        `;
+
+        setOutput(`Switched account to ${currentAccount.slice(0,6)}...${currentAccount.slice(-4)}`);
+      });
+
+      window.ethereum.on('chainChanged', () => window.location.reload());
+    }
+  </script>
+</body>
+</html>
