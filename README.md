@@ -168,5 +168,8 @@ Make sure MetaMask is connected to **BNB Smart Chain Testnet (Chain ID 97)**.
 
 Team 12
 
-BAC2002 — SIT Singapore  
-Module: Blockchain and Cryptocurrency
+Members: Ang Xuan Yu Pamela, Siew Yong Ying, Tay Xin Ying, Teo Shao Xuan, Vanessa Quan Hui Si
+
+Singapore Institute of Technology  
+
+Module: BAC2002 - Blockchain and Cryptocurrency
