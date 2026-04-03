@@ -1,4 +1,4 @@
-<img width="776" height="175" alt="image" src="https://github.com/user-attachments/assets/be1b1340-ad8a-46ff-b4be-ca464c5256c5" /># Decentralised Crowdfunding DApp on BNB Smart Chain
+# Decentralised Crowdfunding DApp on BNB Smart Chain
 
 > BAC2002 Blockchain & Cryptocurrency — Team Project  
 > Milestone-based crowdfunding using smart contracts
