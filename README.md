@@ -160,6 +160,10 @@ Then:
 
 Make sure MetaMask is connected to **BNB Smart Chain Testnet (Chain ID 97)**.
 
+## 🎥 Demo Video
+
+[Watch Crowdfunding DApp Demo Video](./CrowdfundDappDemo.mp4)
+
 ## 👥 Team
 
 Team 12
