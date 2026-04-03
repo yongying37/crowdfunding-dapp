@@ -1,4 +1,4 @@
-# Decentralised Crowdfunding DApp on BNB Smart Chain
+<img width="776" height="175" alt="image" src="https://github.com/user-attachments/assets/be1b1340-ad8a-46ff-b4be-ca464c5256c5" /># Decentralised Crowdfunding DApp on BNB Smart Chain
 
 > BAC2002 Blockchain & Cryptocurrency — Team Project  
 > Milestone-based crowdfunding using smart contracts
@@ -162,7 +162,9 @@ Make sure MetaMask is connected to **BNB Smart Chain Testnet (Chain ID 97)**.
 
 ## 🎥 Demo Video
 
-[Watch Crowdfunding DApp Demo Video](./CrowdfundDappDemo.mp4)
+[▶️ Watch Demo on YouTube](https://youtu.be/I0zmymGvAY8)
+
+The video is also on Github: [Crowdfunding DApp Demo Video](./CrowdfundDappDemo.mp4)
 
 ## 👥 Team
 
